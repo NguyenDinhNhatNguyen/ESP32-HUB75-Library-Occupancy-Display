@@ -1,0 +1,21 @@
+{
+  "version": 1,
+  "author": "Nguyen",
+  "editor": "wokwi",
+  "parts": [
+    { "type": "board-esp32-devkit-v1", "id": "esp", "top": 0, "left": 0, "attrs": {} },
+    {
+      "type": "wokwi-neopixel-matrix",
+      "id": "matrix1",
+      "top": -220,
+      "left": 120,
+      "attrs": { "rows": "32", "cols": "64", "pixelSize": "4" }
+    }
+  ],
+  "connections": [
+    [ "esp:TX0", "$serialMonitor:RX", "", [] ],
+    [ "esp:RX0", "$serialMonitor:TX", "", [] ],
+    [ "esp:D25", "matrix1:DIN", "green", [ "v0" ] ]
+  ],
+  "dependencies": {}
+}
