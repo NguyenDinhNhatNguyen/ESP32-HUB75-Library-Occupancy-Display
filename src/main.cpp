@@ -29,11 +29,12 @@ const byte digits[10][5] = {
 
 void setup() {
   FastLED.addLeds<NEOPIXEL, DATA_PIN>(leds, NUM_LEDS);
-  FastLED.setBrightness(255);
+  FastLED.setBrightness(255); // Độ sáng đèn cao nhất
   randomSeed(analogRead(0)); // Khởi tạo bộ tạo số ngẫu nhiên
 }
 
 int soNguoi = 0;
+bool isBlink = false; // Biến trạng thái để tạo hiệu ứng nhấp nháy cảnh báo
 
 void loop() {
   FastLED.clear();
@@ -53,30 +54,38 @@ void loop() {
   drawSprite(37, 6, digits[5], CRGB::White); 
   drawSprite(41, 6, digits[0], CRGB::White); 
 
-  // 4. Nếu đạt 50 người thì hiện chữ FULL (Căn giữa)
+  // 4. Nếu đạt 50 người thì hiện chữ FULL (Nhấp nháy)
   if (soNguoi >= 50) {
-    int startX = 24; 
-    int startY = 18;
-    drawSprite(startX,     startY, f5, CRGB::Red);
-    drawSprite(startX + 5, startY, u5, CRGB::Red);
-    drawSprite(startX + 10, startY, l5, CRGB::Red);
-    drawSprite(startX + 15, startY, l5, CRGB::Red);
-    
-    FastLED.show();
-    // Dừng tại đây khi đã đầy
-    while(true) { delay(1000); }
+    if (isBlink) {
+      int startX = 24; 
+      int startY = 18;
+      drawSprite(startX,     startY, f5, CRGB::Red);
+      drawSprite(startX + 5, startY, u5, CRGB::Red);
+      drawSprite(startX + 10, startY, l5, CRGB::Red);
+      drawSprite(startX + 15, startY, l5, CRGB::Red);
+    }
+    isBlink = !isBlink; // Đảo trạng thái để khung hình tiếp theo sẽ bật/tắt
   }
 
   FastLED.show();
 
-  // 5. Logic biến động ngẫu nhiên
-  // 70% cơ hội tăng người, 30% cơ hội giảm người (để xu hướng chung vẫn là đi lên)
+  // 5. Logic biến động ngẫu nhiên (Non-blocking)
   int xacSuat = random(0, 100);
-  if (xacSuat < 70) {
-    soNguoi++; 
+  
+  if (soNguoi >= 50) {
+    // Khi thư viện đã đầy nên không ai vào được nữa (không tăng).
+    // Chỉ có sinh viên bên trong đi ra (tạo xác suất 30% có người ra để Demo tiếp diễn)
+    if (xacSuat < 30) {
+      soNguoi--; 
+    }
   } else {
-    if (soNguoi > 0) soNguoi--; // Không để số người âm
+    // Trạng thái bình thường: 70% cơ hội tăng, 30% cơ hội giảm
+    if (xacSuat < 70) {
+      soNguoi++; 
+    } else {
+      if (soNguoi > 0) soNguoi--; // Không để số người âm
+    }
   }
 
-  delay(300); // Tốc độ cập nhật (300ms một lần biến động)
+  delay(300); // Tốc độ làm mới khung hình (300ms/lần biến động)
 }
